@@ -35,7 +35,7 @@ jwt {
 }
 ```
 
-To authorize access based on a claim, use the `allow` syntax.  To deny access, use the `deny` keyword.  You can use multiple keywords to achieve complex access rules.  If any `allow` access rule returns true, access will be allowed.  If a `deny` rule is true, access will be denied.  Deny rules will allow any other value for that claim.   
+To authorize access based on a claim, use the `allow` syntax.  To deny access, use the `deny` keyword.  You can use multiple keywords to achieve complex access rules.  If any `allow` access rule returns true, access will be allowed.  If a `deny` rule is true, access will be denied.  Deny rules will allow any other value for that claim.
 
   For example, suppose you have a token with `user: someone` and `role: member`.  If you have the following access block:
 
@@ -206,7 +206,7 @@ For RSA or ECDSA tokens:
 jwt {
   path /
   publickey /path/to/key.pem
-} 
+}
 ```
 
 For HMAC:
@@ -238,6 +238,10 @@ jwt {
 | 403 | Forbidden - Token is valid but denied because of an ALLOW or DENY rule |
 | 303 | A 401 or 403 was returned and the redirect is enabled.  This takes precedence over a 401 or 403 status. |
 
+
+### Debugging
+
+If you enable the `http.errors` middleware then the reason for any failed authorisations will be logged.
 
 ### Caveats
 

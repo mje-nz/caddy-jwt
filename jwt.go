@@ -81,7 +81,7 @@ func (h Auth) ServeHTTP(w http.ResponseWriter, r *http.Request) (int, error) {
 		// TODO: this is a hack to work our CVE in Caddy dealing with parsing
 		// malformed URLs.  Can be removed once upstream fix for path match
 		if r.URL.EscapedPath() == "" {
-			return handleUnauthorized(w, r, p, h.Realm), nil
+			return handleUnauthorized(w, r, p, h.Realm), fmt.Errorf("malformed path")
 		}
 		cleanedPath := path.Clean(r.URL.Path)
 		if !httpserver.Path(cleanedPath).Matches(p.Path) {
@@ -120,7 +120,7 @@ func (h Auth) ServeHTTP(w http.ResponseWriter, r *http.Request) (int, error) {
 			if p.Passthrough {
 				continue
 			}
-			return handleUnauthorized(w, r, p, h.Realm), nil
+			return handleUnauthorized(w, r, p, h.Realm), err
 		}
 
 		var vToken *jwt.Token
@@ -145,12 +145,12 @@ func (h Auth) ServeHTTP(w http.ResponseWriter, r *http.Request) (int, error) {
 			if p.Passthrough {
 				continue
 			}
-			return handleUnauthorized(w, r, p, h.Realm), nil
+			return handleUnauthorized(w, r, p, h.Realm), fmt.Errorf("could not validate token: %w", err)
 		}
 
 		vClaims, err := Flatten(vToken.Claims.(jwt.MapClaims), "", DotStyle)
 		if err != nil {
-			return handleUnauthorized(w, r, p, h.Realm), nil
+			return handleUnauthorized(w, r, p, h.Realm), fmt.Errorf("could not flatten claims")
 		}
 
 		// If token contains rules with allow or deny, evaluate
@@ -176,7 +176,7 @@ func (h Auth) ServeHTTP(w http.ResponseWriter, r *http.Request) (int, error) {
 				}
 			}
 			if !ok {
-				return handleForbidden(w, r, p, h.Realm), nil
+				return handleForbidden(w, r, p, h.Realm), fmt.Errorf("forbidden")
 			}
 		}
 
